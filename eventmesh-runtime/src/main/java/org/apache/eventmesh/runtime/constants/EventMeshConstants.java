@@ -35,7 +35,9 @@ public class EventMeshConstants {
 
     public static final String IP_PORT_SEPARATOR = ":";
 
-    public static final String EVENTMESH_CONF_HOME = System.getProperty("confPath", System.getenv("confPath"));
+    public static final String CONF_ENV = "confPath";
+
+    public static final String EVENTMESH_CONF_HOME = System.getProperty(CONF_ENV, System.getenv(CONF_ENV));
 
     public static final String EVENTMESH_CONF_FILE = "eventmesh.properties";
 

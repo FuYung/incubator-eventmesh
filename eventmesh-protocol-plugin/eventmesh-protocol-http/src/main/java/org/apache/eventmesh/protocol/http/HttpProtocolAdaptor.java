@@ -41,6 +41,7 @@ import io.cloudevents.CloudEvent;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
+
 /**
  * CloudEvents protocol adaptor, used to transform CloudEvents message to CloudEvents message.
  *
@@ -95,20 +96,22 @@ public class HttpProtocolAdaptor<T extends ProtocolTransportObject>
         }
         httpEventWrapper.setSysHeaderMap(sysHeaderMap);
         // ce data
-        Map<String, Object> dataContentMap = JsonUtils.deserialize(new String(cloudEvent.getData().toBytes(), Constants.DEFAULT_CHARSET),
-            new TypeReference<Map<String, Object>>() {});
+        if (null != cloudEvent.getData()) {
+            Map<String, Object> dataContentMap = JsonUtils.deserialize(new String(cloudEvent.getData().toBytes(), Constants.DEFAULT_CHARSET),
+                new TypeReference<Map<String, Object>>() {
+                });
+            String requestHeader = JsonUtils.serialize(dataContentMap.get(CONSTANTS_KEY_HEADERS));
+            byte[] requestBody = JsonUtils.serialize(dataContentMap.get(CONSTANTS_KEY_BODY)).getBytes(StandardCharsets.UTF_8);
+            Map<String, Object> requestHeaderMap = JsonUtils.deserialize(requestHeader, new TypeReference<Map<String, Object>>() {
+            });
+            String requestURI = dataContentMap.get(CONSTANTS_KEY_PATH).toString();
+            String httpMethod = dataContentMap.get(CONSTANTS_KEY_METHOD).toString();
 
-        String requestHeader = JsonUtils.serialize(dataContentMap.get(CONSTANTS_KEY_HEADERS));
-        byte[] requestBody = JsonUtils.serialize(dataContentMap.get(CONSTANTS_KEY_BODY)).getBytes(StandardCharsets.UTF_8);
-        Map<String, Object> requestHeaderMap = JsonUtils.deserialize(requestHeader, new TypeReference<Map<String, Object>>() {
-        });
-        String requestURI = dataContentMap.get(CONSTANTS_KEY_PATH).toString();
-        String httpMethod = dataContentMap.get(CONSTANTS_KEY_METHOD).toString();
-
-        httpEventWrapper.setHeaderMap(requestHeaderMap);
-        httpEventWrapper.setBody(requestBody);
-        httpEventWrapper.setRequestURI(requestURI);
-        httpEventWrapper.setHttpMethod(httpMethod);
+            httpEventWrapper.setHeaderMap(requestHeaderMap);
+            httpEventWrapper.setBody(requestBody);
+            httpEventWrapper.setRequestURI(requestURI);
+            httpEventWrapper.setHttpMethod(httpMethod);
+        }
         return httpEventWrapper;
 
     }

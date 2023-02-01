@@ -15,7 +15,10 @@
  * limitations under the License.
  */
 
-create database db_workflow;
+create database if not exists db_workflow;
+
+use db_workflow;
+
 create table if not exists t_workflow
 (
     id            int auto_increment primary key,
@@ -26,7 +29,7 @@ create table if not exists t_workflow
     version       varchar(64)                        not null,
     create_time   datetime default CURRENT_TIMESTAMP not null,
     update_time   datetime default CURRENT_TIMESTAMP not null,
-    unique (workflow_id)
+    index `index_workflow_id` (workflow_id)
     ) collate = utf8mb3_bin;
 
 create table if not exists t_workflow_instance
@@ -37,7 +40,8 @@ create table if not exists t_workflow_instance
     workflow_instance_id varchar(1024)                      not null,
     workflow_status      int                                not null,
     create_time          datetime default CURRENT_TIMESTAMP not null,
-    update_time          datetime default CURRENT_TIMESTAMP not null
+    update_time          datetime default CURRENT_TIMESTAMP not null,
+    index `index_workflow_id` (workflow_id)
     )
     collate = utf8mb3_bin;
 
@@ -45,13 +49,15 @@ create table if not exists t_workflow_task
 (
     id          int auto_increment
     primary key,
-    workflow_id varchar(1024)                      not null,
-    task_id     varchar(1024)                      not null,
-    task_name   varchar(1024)                      not null,
-    task_type   varchar(64)                        not null,
-    status      int                                not null,
+    workflow_id       varchar(1024)                      not null,
+    task_id           varchar(1024)                      not null,
+    task_name         varchar(1024)                      not null,
+    task_type         varchar(64)                        not null,
+    task_input_filter varchar(1024)                      not null default '',
+    status            int                                not null,
     create_time datetime default CURRENT_TIMESTAMP not null,
-    update_time datetime default CURRENT_TIMESTAMP not null
+    update_time datetime default CURRENT_TIMESTAMP not null,
+    index `index_workflow_id` (workflow_id)
     )
     collate = utf8mb3_bin;
 
@@ -65,7 +71,8 @@ create table if not exists t_workflow_task_action
     operation_type varchar(1024)                      not null,
     status         int                                not null,
     create_time    datetime default CURRENT_TIMESTAMP not null,
-    update_time    datetime default CURRENT_TIMESTAMP not null
+    update_time    datetime default CURRENT_TIMESTAMP not null,
+    index `index_workflow_id` (workflow_id)
     )
     collate = utf8mb3_bin;
 
@@ -81,7 +88,8 @@ create table if not exists t_workflow_task_instance
     input                text                               not null,
     retry_times          int                                not null,
     create_time          datetime default CURRENT_TIMESTAMP not null,
-    update_time          datetime default CURRENT_TIMESTAMP not null
+    update_time          datetime default CURRENT_TIMESTAMP not null,
+    index `index_workflow_id` (workflow_id)
     )
     collate = utf8mb3_bin;
 
@@ -95,7 +103,9 @@ create table if not exists t_workflow_task_relation
     `condition`  varchar(2048)                      not null,
     status       int                                not null,
     create_time  datetime default CURRENT_TIMESTAMP not null,
-    update_time  datetime default CURRENT_TIMESTAMP not null
+    update_time  datetime default CURRENT_TIMESTAMP not null,
+    index `index_from_task_id` (from_task_id)
+    index `index_workflow_id` (workflow_id)
     )
     collate = utf8mb3_bin;
 

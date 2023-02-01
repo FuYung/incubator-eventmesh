@@ -17,7 +17,7 @@ package config
 
 import (
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
+	"os"
 )
 
 var (
@@ -28,6 +28,7 @@ type Config struct {
 	Flow struct {
 		Queue struct {
 			Store string `yaml:"store"`
+			Topic string `yaml:"topic"`
 		} `yaml:"queue"`
 		Scheduler struct {
 			Type     string `yaml:"type"`
@@ -50,8 +51,12 @@ type Config struct {
 		UserName      string `yaml:"username"`
 		Password      string `yaml:"password"`
 		ProducerGroup string `yaml:"producer_group"`
+		ConsumerGroup string `yaml:"consumer_group"`
 		TTL           int    `yaml:"ttl"`
 	} `yaml:"eventmesh"`
+	Metrics struct {
+		EndpointPort string `yaml:"endpoint_port"`
+	} `yaml:"metrics"`
 }
 
 // Setup setup config
@@ -70,7 +75,7 @@ func Get() *Config {
 }
 
 func parseConfigFromFile(configPath string) (*Config, error) {
-	buf, err := ioutil.ReadFile(configPath)
+	buf, err := os.ReadFile(configPath)
 	if err != nil {
 		return nil, err
 	}

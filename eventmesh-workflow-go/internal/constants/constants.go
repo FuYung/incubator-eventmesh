@@ -21,12 +21,15 @@ type QueueType int
 const (
 	// QueueTypeInMemory in memory queue type
 	QueueTypeInMemory = "in-memory"
+	// QueueTypeEventMesh EventMesh queue
+	QueueTypeEventMesh = "eventmesh"
 )
 
 const (
-	TaskStartID      = "START"
-	TaskEndID        = "END"
-	TaskNormalStatus = 1
+	TaskStartID   = "START"
+	TaskEndID     = "END"
+	NormalStatus  = 1
+	InvalidStatus = -1
 )
 
 // task instance status
@@ -63,6 +66,29 @@ const (
 
 const (
 	EventTypePublish                 = "publish"
-	EventPropsWorkflowInstanceID     = "workflow_instance_id"
-	EventPropsWorkflowTaskInstanceID = "workflow_task_instance_id"
+	EventPropsWorkflowInstanceID     = "workflowinstanceid"
+	EventPropsWorkflowTaskInstanceID = "workflowtaskinstanceid"
+)
+
+// Metrics Collector types
+const (
+	MetricsEventTask     = "event_task"
+	MetricsOperationTask = "operation_task"
+	MetricsSwitchTask    = "switch_task"
+	MetricsScheduler     = "scheduler"
+	MetricsEngine        = "engine"
+	MetricsTaskQueue     = "task_queue"
+)
+
+// Metrics labels
+const (
+	MetricsTotal        = "total"
+	MetricsSwitchReject = "reject"
+	MetricsSwitchPass   = "pass"
+
+	MetricsStartRequest      = "start_request"
+	MetricsTransitionRequest = "transition_request"
+
+	MetricsDbLockAcquireTime = "db_lock_acquire_time"
+	MetricsQueueSize         = "queue_size"
 )

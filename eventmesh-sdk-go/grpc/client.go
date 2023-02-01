@@ -59,10 +59,20 @@ func newEventMeshGRPCClient(cfg *conf.GRPCConfig, opts ...GRPCOption) (*eventMes
 	var (
 		err         error
 		ctx, cancel = context.WithCancel(context.Background())
+		grpConn     *grpc.ClientConn
 	)
 	if err = conf.ValidateDefaultConf(cfg); err != nil {
 		return nil, err
 	}
+	defer func() {
+		if err != nil && grpConn != nil {
+			// if err != nil and the grpc.ClientConn is connected
+			// we need to close it
+			if err := grpConn.Close(); err != nil {
+				log.Warnf("failed to close conn with, err:%v", err)
+			}
+		}
+	}()
 	makeGRPCConn := func(host string, port int) (*grpc.ClientConn, error) {
 		addr := fmt.Sprintf("%v:%v", host, port)
 		conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
@@ -84,10 +94,11 @@ func newEventMeshGRPCClient(cfg *conf.GRPCConfig, opts ...GRPCOption) (*eventMes
 		cli.seqg = seq.NewAtomicSeq()
 	}
 	time.Sleep(time.Nanosecond * time.Duration(rand.Int31n(50)))
-	grpConn, err := makeGRPCConn(cfg.Host, cfg.Port)
+	conn, err := makeGRPCConn(cfg.Host, cfg.Port)
 	if err != nil {
 		return nil, err
 	}
+	grpConn = conn
 	producer, err := newProducer(grpConn)
 	if err != nil {
 		log.Warnf("failed to create producer, err:%v", err)
@@ -163,7 +174,7 @@ func (e *eventMeshGRPCClient) setupContext(ctx context.Context) context.Context 
 
 // Close meshclient and free all resources
 func (e *eventMeshGRPCClient) Close() error {
-	log.Infof("close grpc client")
+	log.Infof("begin close grpc client")
 	if e.cancel != nil {
 		e.cancel()
 	}
@@ -179,6 +190,7 @@ func (e *eventMeshGRPCClient) Close() error {
 		}
 		e.eventMeshConsumer = nil
 	}
+
 	if e.grpcConn != nil {
 		if err := e.grpcConn.Close(); err != nil {
 			log.Warnf("err in close conn with err:%v", err)
